@@ -52,7 +52,7 @@ class ReceiverService : Service() {
     private fun stopVpn() { startService(Intent(this, ReceiverVpnService::class.java).apply { action = ReceiverVpnService.ACTION_STOP }); stopForeground(STOP_FOREGROUND_REMOVE) }
 
     private fun buildNotification(title: String, text: String): Notification {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager; nm.createNotificationChannel(NotificationChannel(Constants.CHANNEL_ID, "DataNet Share", NotificationManager.IMPORTANCE_LOW)) }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager; nm.createNotificationChannel(NotificationChannel(Constants.CHANNEL_ID, "Phuck StraightTalk", NotificationManager.IMPORTANCE_LOW)) }
         return NotificationCompat.Builder(this, Constants.CHANNEL_ID).setContentTitle(title).setContentText(text).setSmallIcon(android.R.drawable.stat_sys_download).setOngoing(true).build()
     }
 }
