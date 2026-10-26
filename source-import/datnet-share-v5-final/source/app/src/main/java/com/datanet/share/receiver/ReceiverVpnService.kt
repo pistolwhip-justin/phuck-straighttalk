@@ -54,15 +54,15 @@ class ReceiverVpnService : VpnService() {
 
     private fun tryStartForeground() {
         if (foregroundStarted) return
-        try { ServiceCompat.startForeground(this, Constants.RECEIVER_NOTIFICATION_ID, buildNotification("DataNet Share Receiver", "VPN tunnel active"), ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE); foregroundStarted = true } catch (e: Throwable) {
-            try { startForeground(Constants.RECEIVER_NOTIFICATION_ID, buildNotification("DataNet Share Receiver", "VPN tunnel active")); foregroundStarted = true } catch (_: Throwable) {}
+        try { ServiceCompat.startForeground(this, Constants.RECEIVER_NOTIFICATION_ID, buildNotification("Phuck StraightTalk Receiver", "VPN tunnel active"), ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE); foregroundStarted = true } catch (e: Throwable) {
+            try { startForeground(Constants.RECEIVER_NOTIFICATION_ID, buildNotification("Phuck StraightTalk Receiver", "VPN tunnel active")); foregroundStarted = true } catch (_: Throwable) {}
         }
     }
 
     private fun startTunnel(socksHost: String, socksPort: Int) {
         if (running) return
         acquireWakeLock()
-        val builder = Builder().setSession("DataNet Share Receiver").addAddress(Constants.VPN_ADDRESS, 24).addDnsServer(Constants.TUNNELED_DNS).setMtu(1500)
+        val builder = Builder().setSession("Phuck StraightTalk Receiver").addAddress(Constants.VPN_ADDRESS, 24).addDnsServer(Constants.TUNNELED_DNS).setMtu(1500)
         builder.addRoute("0.0.0.0", 1); builder.addRoute("128.0.0.0", 1)
         try { pfd = builder.establish() } catch (e: Throwable) { broadcast("failed", "VPN establish failed: ${e.javaClass.simpleName}: ${e.message}"); stopSelf(); return }
         if (pfd == null) { broadcast("failed", "VPN permission denied"); stopSelf(); return }
@@ -91,7 +91,7 @@ class ReceiverVpnService : VpnService() {
 
     // No wake lock timeout — relies on stopTunnel/stopSelf to release.
     // Previous 10-hour timeout caused silent session death after 10h.
-    private fun acquireWakeLock() { if (wakeLock == null) { try { val pm = getSystemService(Context.POWER_SERVICE) as PowerManager; wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DataNetShare::Receiver").apply { acquire() } } catch (_: Throwable) {} } }
+    private fun acquireWakeLock() { if (wakeLock == null) { try { val pm = getSystemService(Context.POWER_SERVICE) as PowerManager; wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "PhuckStraightTalk::Receiver").apply { acquire() } } catch (_: Throwable) {} } }
     private fun releaseWakeLock() { try { wakeLock?.release() } catch (_: Throwable) {}; wakeLock = null }
 
     private fun rebroadcastState() {
@@ -104,7 +104,7 @@ class ReceiverVpnService : VpnService() {
     }
 
     private fun buildNotification(title: String, text: String): android.app.Notification {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) { val nm = getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager; nm.createNotificationChannel(android.app.NotificationChannel(Constants.CHANNEL_ID, "DataNet Share", android.app.NotificationManager.IMPORTANCE_LOW)) }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) { val nm = getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager; nm.createNotificationChannel(android.app.NotificationChannel(Constants.CHANNEL_ID, "Phuck StraightTalk", android.app.NotificationManager.IMPORTANCE_LOW)) }
         return NotificationCompat.Builder(this, Constants.CHANNEL_ID).setContentTitle(title).setContentText(text).setSmallIcon(android.R.drawable.stat_sys_download).setOngoing(true).build()
     }
 
