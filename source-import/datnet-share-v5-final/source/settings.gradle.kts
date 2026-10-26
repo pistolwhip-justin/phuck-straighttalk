@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "DataNetShare"
+rootProject.name = "PhuckStraightTalk"
 include(":app")
