@@ -1,0 +1,95 @@
+name: Release 5.0.1 Test APK
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "source-import/datnet-share-v5-final/source/**"
+      - ".github/workflows/release-5.0.1.yml"
+      - "README.md"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out committed source
+        uses: actions/checkout@v4
+
+      - name: Guard immutable release
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v5.0.1 --json assets > /tmp/release.json 2>/dev/null; then
+            if jq -e '.assets[] | select(.name == "PhuckStraightTalk-v5.0.1-debug.apk")' /tmp/release.json >/dev/null; then
+              echo "Release v5.0.1 already has its expected APK; leaving it unchanged."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Release v5.0.1 exists but is missing its expected APK. Refusing to overwrite or repair it."
+            exit 1
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 17
+        if: steps.guard.outputs.skip != 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle 8.5
+        if: steps.guard.outputs.skip != 'true'
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.5"
+
+      - name: Verify and install Android SDK components
+        if: steps.guard.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
+          test -n "${ANDROID_HOME:-}"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager 2>/dev/null | sort | tail -1)"
+          test -n "$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Run unit tests and assemble debug APK
+        if: steps.guard.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source-import/datnet-share-v5-final/source
+          gradle --no-daemon testDebugUnitTest assembleDebug
+          test -s app/build/outputs/apk/debug/app-debug.apk
+          cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/PhuckStraightTalk-v5.0.1-debug.apk"
+
+      - name: Create immutable GitHub Release and upload APK
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create v5.0.1 "$GITHUB_WORKSPACE/PhuckStraightTalk-v5.0.1-debug.apk" \
+            --title "Phuck StraightTalk v5.0.1 — Branding Fix Test APK" \
+            --notes "## Phuck StraightTalk v5.0.1 test build
+
+          - Fixes the main screen title to use the Phuck StraightTalk app name.
+          - Replaces the original blue/network launcher mark with a black, orange, and white branded icon.
+          - Keeps the sender and receiver implementation unchanged.
+          - Debug-signed APK for sideload testing; not a production or Play Store release.
+          - Application ID: pro.pistolwhip.phuckstraighttalk
+          - Minimum Android version: Android 8 (API 26).
+          - Device behavior still requires user testing.
+          - Original project attribution and MIT license obligations remain in force."
