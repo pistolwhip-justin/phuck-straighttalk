@@ -1,0 +1,3 @@
+/home/z/my-project/build/datanet-share-v4/app/.cxx/RelWithDebInfo/3wv4t4p6/x86_64/CMakeFiles/datanet_native.dir
+/home/z/my-project/build/datanet-share-v4/app/.cxx/RelWithDebInfo/3wv4t4p6/x86_64/CMakeFiles/edit_cache.dir
+/home/z/my-project/build/datanet-share-v4/app/.cxx/RelWithDebInfo/3wv4t4p6/x86_64/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    android:background="#0F1419">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DataNet Share"
+            android:textColor="#E6E8EB"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Share mobile data - no carrier hotspot"
+            android:textColor="#7A8190"
+            android:textSize="14sp"
+            android:layout_marginBottom="24dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="STATUS"
+            android:textColor="#7A8190"
+            android:textSize="11sp"
+            android:letterSpacing="0.1" />
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Idle"
+            android:textColor="#4ADE80"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+        <LinearLayout
+            android:id="@+id/credsCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1E3A5F"
+            android:padding="16dp"
+            android:layout_marginBottom="20dp"
+            android:visibility="gone">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="CREDENTIALS / INTERFACES"
+                android:textColor="#93C5FD"
+                android:textSize="11sp"
+                android:letterSpacing="0.1"
+                android:layout_marginBottom="8dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Network name (SSID):"
+                android:textColor="#9CA3AF"
+                android:textSize="11sp" />
+            <TextView
+                android:id="@+id/ssidText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="10dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Password:"
+                android:textColor="#9CA3AF"
+                android:textSize="11sp" />
+            <TextView
+                android:id="@+id/passText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="10dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="AVAILABLE INTERFACES (for PC/Mac proxy):"
+                android:textColor="#93C5FD"
+                android:textSize="11sp"
+                android:letterSpacing="0.1"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
+            <TextView
+                android:id="@+id/interfacesText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:fontFamily="monospace" />
+            <Button
+                android:id="@+id/btnRefreshInterfaces"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:text="REFRESH INTERFACES"
+                android:backgroundTint="#1E40AF"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="WiFi Direct mode: share to another phone (creates WiFi Direct group)"
+            android:textColor="#A0A6B2"
+            android:textSize="13sp"
+            android:layout_marginBottom="12dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Local-only mode: share to PC/Mac on same network or via USB tethering (no WiFi Direct conflict)"
+            android:textColor="#A0A6B2"
+            android:textSize="13sp"
+            android:layout_marginBottom="24dp" />
+        <Button
+            android:id="@+id/btnSender"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="START SHARING (WiFi Direct)"
+            android:backgroundTint="#2563EB"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="10dp" />
+        <Button
+            android:id="@+id/btnLocalOnly"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="START LOCAL ONLY (USB/WiFi)"
+            android:backgroundTint="#0891B2"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="10dp" />
+        <Button
+            android:id="@+id/btnReceiver"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="START RECEIVING (receiver)"
+            android:backgroundTint="#059669"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="10dp" />
+        <Button
+            android:id="@+id/btnForceStop"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="STOP"
+            android:backgroundTint="#7F1D1D"
+            android:textColor="#FEE2E2"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="20dp" />
+        <Button
+            android:id="@+id/btnUdpTest"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="TEST UDP (run on receiver)"
+            android:backgroundTint="#9333EA"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="10dp" />
+        <Button
+            android:id="@+id/btnSpeedTest"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="LINK SPEED TEST (run on receiver)"
+            android:backgroundTint="#D97706"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="LOG"
+            android:textColor="#7A8190"
+            android:textSize="11sp"
+            android:letterSpacing="0.1" />
+        <TextView
+            android:id="@+id/logText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="180dp"
+            android:background="#161B22"
+            android:padding="12dp"
+            android:textColor="#9CA3AF"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:scrollbars="vertical"
+            android:textIsSelectable="true" />
+    </LinearLayout>
+</ScrollView>

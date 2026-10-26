@@ -1,0 +1,27 @@
+{
+  "buildFiles": [
+    "/home/z/my-project/build/datanet-share-v4/app/src/main/cpp/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/home/z/android-sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/home/z/my-project/build/datanet-share-v4/app/.cxx/RelWithDebInfo/3wv4t4p6/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/home/z/android-sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/home/z/my-project/build/datanet-share-v4/app/.cxx/RelWithDebInfo/3wv4t4p6/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "datanet_native::@6890427a1f51a3e7e1df": {
+      "artifactName": "datanet_native",
+      "abi": "x86",
+      "output": "/home/z/my-project/build/datanet-share-v4/app/build/intermediates/cxx/RelWithDebInfo/3wv4t4p6/obj/x86/libdatanet_native.so",
+      "runtimeFiles": []
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "buildFiles": [
+    "/home/z/my-project/build/datanet-share-v4/app/src/main/cpp/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/home/z/android-sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/home/z/my-project/build/datanet-share-v4/app/.cxx/RelWithDebInfo/3wv4t4p6/arm64-v8a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/home/z/android-sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/home/z/my-project/build/datanet-share-v4/app/.cxx/RelWithDebInfo/3wv4t4p6/arm64-v8a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "datanet_native::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "datanet_native",
+      "output": "/home/z/my-project/build/datanet-share-v4/app/build/intermediates/cxx/RelWithDebInfo/3wv4t4p6/obj/arm64-v8a/libdatanet_native.so",
+      "runtimeFiles": []
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/home/z/android-sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/linux-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/home/z/android-sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

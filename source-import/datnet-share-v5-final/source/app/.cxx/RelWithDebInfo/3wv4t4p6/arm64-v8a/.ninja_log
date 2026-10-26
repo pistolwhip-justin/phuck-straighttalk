@@ -1,0 +1,3 @@
+# ninja log v5
+0	104	1786855600542163446	CMakeFiles/datanet_native.dir/native.cpp.o	acb91e14b0dcfa76
+104	120	1786855600560163517	/home/z/my-project/build/datanet-share-v4/app/build/intermediates/cxx/RelWithDebInfo/3wv4t4p6/obj/arm64-v8a/libdatanet_native.so	967133468a8d42df

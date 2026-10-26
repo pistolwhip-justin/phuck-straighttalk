@@ -1,0 +1,1 @@
+/home/z/my-project/build/datanet-share-v4/app/build/intermediates/cxx/RelWithDebInfo/3wv4t4p6/obj/arm64-v8a
