@@ -12,8 +12,8 @@ android {
         applicationId = "pro.pistolwhip.phuckstraighttalk"
         minSdk = 26
         targetSdk = 34
-        versionCode = 31
-        versionName = "5.0.0"
+        versionCode = 32
+        versionName = "5.0.1"
     }
 
     signingConfigs {
