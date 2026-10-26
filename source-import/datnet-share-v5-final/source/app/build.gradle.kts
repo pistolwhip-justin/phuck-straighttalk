@@ -4,22 +4,22 @@ plugins {
 }
 
 android {
+    // Keep the original Kotlin namespace so existing source references remain unchanged.
     namespace = "com.datanet.share"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.datanet.share"
+        applicationId = "pro.pistolwhip.phuckstraighttalk"
         minSdk = 26
         targetSdk = 34
-        versionCode = 30
-        versionName = "5.0-unified"
+        versionCode = 31
+        versionName = "5.0.0"
     }
 
     signingConfigs {
         create("release") {
-            // Read keystore path and passwords from environment variables or local.properties.
-            // This prevents the credentials from being committed to source control.
-            // Fallback to the legacy keystore for backwards compatibility.
+            // Original upstream release-signing configuration retained for reference.
+            // The test APK is built with the Android debug signing key, not this config.
             storeFile = file(System.getenv("DATANET_STORE_FILE") ?: "/home/z/my-project/keystore/datanet-release.jks")
             storePassword = System.getenv("DATANET_STORE_PASSWORD") ?: "datanetshare2024"
             keyAlias = System.getenv("DATANET_KEY_ALIAS") ?: "datanet"
@@ -39,7 +39,7 @@ android {
     }
 
     externalNativeBuild {
-        // No native build — unified version uses pure-Kotlin receiver code (v3.5 style)
+        // Preserve the upstream project configuration.
     }
 
     compileOptions {
