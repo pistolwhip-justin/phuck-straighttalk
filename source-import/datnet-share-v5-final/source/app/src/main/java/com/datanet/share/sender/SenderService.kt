@@ -80,7 +80,7 @@ class SenderService : Service() {
             val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
             // No timeout — relies on stopForeground/stopSelf to release the lock.
             // The previous 10-hour timeout caused silent session death after 10h.
-            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DataNetShare::Sender").apply { acquire() }
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "PhuckStraightTalk::Sender").apply { acquire() }
         }
     }
 
@@ -158,7 +158,7 @@ class SenderService : Service() {
     }
 
     private fun buildNotification(title: String, text: String): Notification {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager; nm.createNotificationChannel(NotificationChannel(Constants.CHANNEL_ID, "DataNet Share", NotificationManager.IMPORTANCE_LOW)) }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager; nm.createNotificationChannel(NotificationChannel(Constants.CHANNEL_ID, "Phuck StraightTalk", NotificationManager.IMPORTANCE_LOW)) }
         return NotificationCompat.Builder(this, Constants.CHANNEL_ID).setContentTitle(title).setContentText(text).setSmallIcon(android.R.drawable.stat_sys_data_bluetooth).setOngoing(true).build()
     }
 
