@@ -1,0 +1,54 @@
+name: Extract Android Source Archive
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify and inspect archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f datnet-share-v5-final.zip
+          unzip -t datnet-share-v5-final.zip
+          mkdir -p /tmp/datanet-source
+          unzip -q datnet-share-v5-final.zip -d /tmp/datanet-source
+          echo "Archive file listing:"
+          find /tmp/datanet-source -maxdepth 4 -type f | sort | head -300
+          echo "Top-level archive entries:"
+          find /tmp/datanet-source -mindepth 1 -maxdepth 1 -printf '%f\n' | sort
+
+      - name: Copy source into source-import
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source-import
+          cp -a /tmp/datanet-source/. source-import/
+          # Avoid accidentally importing Git metadata or nested archives.
+          find source-import -type d -name .git -prune -exec rm -rf {} +
+          echo "Imported file count:"
+          find source-import -type f | wc -l
+          echo "Imported project files:"
+          find source-import -maxdepth 4 -type f | sort | head -300
+
+      - name: Commit extracted source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add source-import
+          if git diff --cached --quiet; then
+            echo "No source changes to commit."
+          else
+            git commit -m "Import extracted DataNetShare Android source"
+            git push
+          fi
