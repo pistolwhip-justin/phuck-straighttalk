@@ -98,7 +98,7 @@ class SenderService : Service() {
             if (wifiHost == null) wifiHost = WifiDirectHost(this)
             stateObserver?.let { wifiHost?.state?.removeObserver(it) }
             val observer = androidx.lifecycle.Observer<WifiDirectHost.State> { state ->
-                DiagnosticLogger.record("wifi_direct_state", mapOf("state" to state.javaClass.simpleName, "detail" to state.toString()))
+                DiagnosticLogger.record("wifi_direct_state", mapOf("state" to state.javaClass.simpleName))
                 when (state) {
                     is WifiDirectHost.State.Idle -> {}
                     is WifiDirectHost.State.Initializing -> broadcast("starting", "Initializing WiFi Direct (attempt ${state.attempt}/${state.maxAttempts})...")
