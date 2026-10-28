@@ -1,6 +1,7 @@
 package com.datanet.share.receiver
 
 import android.util.Log
+import com.datanet.share.common.DiagnosticLogger
 import java.io.FileDescriptor
 import java.io.FileInputStream
 import java.net.Socket
@@ -35,6 +36,7 @@ class Tun2Socks(
     fun start() {
         if (running) return
         running = true
+        DiagnosticLogger.record("tun2socks_started", mapOf("socks_port" to socksPort.toString()))
         tunInput = FileInputStream(tunFd)
         Thread({ readLoop() }, "tun2socks-read").start()
         Thread({ statsLoop() }, "tun2socks-stats").start()
@@ -52,7 +54,10 @@ class Tun2Socks(
     private fun statsLoop() {
         while (running) {
             try { Thread.sleep(1000) } catch (_: InterruptedException) { break }
-            onStats(connections.size, rxBytes.get(), txBytes.get())
+            val rx = rxBytes.get()
+            val tx = txBytes.get()
+            DiagnosticLogger.record("tun2socks_stats", mapOf("active_tcp_flows" to connections.size.toString(), "rx_bytes" to rx.toString(), "tx_bytes" to tx.toString(), "packets_read" to packetCount.get().toString(), "tcp_syns" to tcpSynCount.get().toString(), "stats_thread" to Thread.currentThread().name))
+            onStats(connections.size, rx, tx)
         }
     }
 
