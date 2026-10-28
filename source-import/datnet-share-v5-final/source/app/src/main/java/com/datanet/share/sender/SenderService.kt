@@ -16,6 +16,7 @@ import androidx.core.app.ServiceCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.datanet.share.common.CellularNetworkTracker
 import com.datanet.share.common.Constants
+import com.datanet.share.common.DiagnosticLogger
 import com.datanet.share.common.FormatBytes
 import com.datanet.share.common.InterfaceEnumerator
 
@@ -46,6 +47,7 @@ class SenderService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        DiagnosticLogger.record("sender_service_command", mapOf("action" to (intent?.action ?: "null"), "start_id" to startId.toString()))
         try {
             when (intent?.action) {
                 ACTION_START -> startSharing(useWifiDirect = true)
@@ -81,12 +83,14 @@ class SenderService : Service() {
             // No timeout — relies on stopForeground/stopSelf to release the lock.
             // The previous 10-hour timeout caused silent session death after 10h.
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "PhuckStraightTalk::Sender").apply { acquire() }
+            DiagnosticLogger.record("sender_wakelock_acquired", mapOf("held" to wakeLock!!.isHeld.toString()))
         }
     }
 
-    private fun releaseLocks() { try { wakeLock?.release() } catch (_: Exception) {}; wakeLock = null }
+    private fun releaseLocks() { val held = wakeLock?.isHeld == true; try { wakeLock?.release() } catch (_: Exception) {}; wakeLock = null; DiagnosticLogger.record("sender_wakelock_released", mapOf("was_held" to held.toString())) }
 
     private fun startSharing(useWifiDirect: Boolean) {
+        DiagnosticLogger.record("sender_session_start_requested", mapOf("wifi_direct" to useWifiDirect.toString()))
         try { ServiceCompat.startForeground(this, Constants.SENDER_NOTIFICATION_ID, buildNotification("Starting sharing...", if (useWifiDirect) "Negotiating WiFi Direct group" else "Local-only mode"), ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE) } catch (_: Throwable) { try { startForeground(Constants.SENDER_NOTIFICATION_ID, buildNotification("Starting...", "")) } catch (_: Throwable) {} }
         acquireLocks()
         broadcast("starting", if (useWifiDirect) "Acquiring WiFi Direct group..." else "Starting local-only SOCKS5 proxy...")
@@ -94,6 +98,7 @@ class SenderService : Service() {
             if (wifiHost == null) wifiHost = WifiDirectHost(this)
             stateObserver?.let { wifiHost?.state?.removeObserver(it) }
             val observer = androidx.lifecycle.Observer<WifiDirectHost.State> { state ->
+                DiagnosticLogger.record("wifi_direct_state", mapOf("state" to state.javaClass.simpleName, "detail" to state.toString()))
                 when (state) {
                     is WifiDirectHost.State.Idle -> {}
                     is WifiDirectHost.State.Initializing -> broadcast("starting", "Initializing WiFi Direct (attempt ${state.attempt}/${state.maxAttempts})...")
@@ -112,6 +117,7 @@ class SenderService : Service() {
     private fun onLocalReady() {
         if (socks != null) return
         socks = Socks5Server(this, "0.0.0.0", Constants.SOCKS5_PORT) { clients, rx, tx ->
+            DiagnosticLogger.record("sender_traffic_stats", mapOf("clients" to clients.toString(), "rx_bytes" to rx.toString(), "tx_bytes" to tx.toString(), "mode" to "local"))
             val cellular = if (CellularNetworkTracker.cellularAvailable()) "mobile data" else "no cellular!"
             updateNotification("Sharing mobile data (local)", "$clients client(s) - ${FormatBytes.formatRxTx(rx, tx)} - $cellular")
         }
@@ -129,6 +135,7 @@ class SenderService : Service() {
     private fun onGroupReady(groupOwnerIp: String, ssid: String, passphrase: String) {
         if (socks != null) return
         socks = Socks5Server(this, groupOwnerIp, Constants.SOCKS5_PORT) { clients, rx, tx ->
+            DiagnosticLogger.record("sender_traffic_stats", mapOf("clients" to clients.toString(), "rx_bytes" to rx.toString(), "tx_bytes" to tx.toString(), "mode" to "wifi_direct"))
             val cellular = if (CellularNetworkTracker.cellularAvailable()) "mobile data" else "no cellular!"
             updateNotification("Sharing mobile data via WiFi Direct", "$clients client(s) - ${FormatBytes.formatRxTx(rx, tx)} - $cellular")
         }
@@ -146,6 +153,7 @@ class SenderService : Service() {
     }
 
     private fun stopSharing() {
+        DiagnosticLogger.record("sender_session_stop_requested")
         stateObserver?.let { wifiHost?.state?.removeObserver(it) }; stateObserver = null
         try { socks?.stop() } catch (_: Exception) {}; socks = null
         try { speedTest?.stop() } catch (_: Exception) {}; speedTest = null
@@ -155,6 +163,7 @@ class SenderService : Service() {
         try { stopForeground(STOP_FOREGROUND_REMOVE) } catch (_: Throwable) {}
         try { (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(Constants.SENDER_NOTIFICATION_ID) } catch (_: Exception) {}
         broadcast("stopped", "Sharing stopped")
+        DiagnosticLogger.record("sender_session_stopped")
     }
 
     private fun buildNotification(title: String, text: String): Notification {
@@ -174,5 +183,5 @@ class SenderService : Service() {
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
     }
 
-    override fun onDestroy() { super.onDestroy(); stopSharing() }
+    override fun onDestroy() { DiagnosticLogger.record("sender_service_destroyed"); super.onDestroy(); stopSharing() }
 }
