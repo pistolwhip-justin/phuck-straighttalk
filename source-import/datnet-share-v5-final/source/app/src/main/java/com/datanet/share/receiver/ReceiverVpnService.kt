@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.datanet.share.common.Constants
+import com.datanet.share.common.DiagnosticLogger
 
 class ReceiverVpnService : VpnService() {
     companion object {
@@ -34,6 +35,7 @@ class ReceiverVpnService : VpnService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action
+        DiagnosticLogger.record("receiver_vpn_service_command", mapOf("action" to (action ?: "null"), "start_id" to startId.toString()))
         try {
             tryStartForeground()
             when (action) {
@@ -60,6 +62,7 @@ class ReceiverVpnService : VpnService() {
     }
 
     private fun startTunnel(socksHost: String, socksPort: Int) {
+        DiagnosticLogger.record("receiver_tunnel_start_requested", mapOf("already_running" to running.toString(), "socks_port" to socksPort.toString()))
         if (running) return
         acquireWakeLock()
         val builder = Builder().setSession("Phuck StraightTalk Receiver").addAddress(Constants.VPN_ADDRESS, 24).addDnsServer(Constants.TUNNELED_DNS).setMtu(1500)
@@ -70,6 +73,7 @@ class ReceiverVpnService : VpnService() {
         try {
             tun2socks = Tun2Socks(pfd!!.fileDescriptor, socksHost, socksPort, { s -> protect(s) }, { d -> protect(d) }) { active, rx, tx -> broadcast("stats", "active=$active rx=${rx/1024}KB tx=${tx/1024}KB") }
             tun2socks?.start()
+            DiagnosticLogger.record("receiver_tunnel_started", mapOf("socks_port" to socksPort.toString(), "tun_fd_valid" to pfd!!.fileDescriptor.valid().toString()))
             broadcast("active", "Tunneling via $socksHost:$socksPort")
         } catch (t: Throwable) {
             broadcast("failed", "Tun2Socks start: ${t.javaClass.simpleName}: ${t.message}")
@@ -78,6 +82,7 @@ class ReceiverVpnService : VpnService() {
     }
 
     private fun stopTunnel() {
+        DiagnosticLogger.record("receiver_tunnel_stop_requested", mapOf("was_running" to running.toString()))
         running = false
         try { tun2socks?.stop() } catch (_: Throwable) {}
         tun2socks = null
@@ -87,12 +92,13 @@ class ReceiverVpnService : VpnService() {
         try { stopForeground(STOP_FOREGROUND_REMOVE) } catch (_: Throwable) {}
         try { (getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(Constants.RECEIVER_NOTIFICATION_ID) } catch (_: Throwable) {}
         broadcast("stopped", "Tunnel stopped")
+        DiagnosticLogger.record("receiver_tunnel_stopped")
     }
 
     // No wake lock timeout — relies on stopTunnel/stopSelf to release.
     // Previous 10-hour timeout caused silent session death after 10h.
-    private fun acquireWakeLock() { if (wakeLock == null) { try { val pm = getSystemService(Context.POWER_SERVICE) as PowerManager; wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "PhuckStraightTalk::Receiver").apply { acquire() } } catch (_: Throwable) {} } }
-    private fun releaseWakeLock() { try { wakeLock?.release() } catch (_: Throwable) {}; wakeLock = null }
+    private fun acquireWakeLock() { if (wakeLock == null) { try { val pm = getSystemService(Context.POWER_SERVICE) as PowerManager; wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "PhuckStraightTalk::Receiver").apply { acquire() }; DiagnosticLogger.record("receiver_wakelock_acquired", mapOf("held" to (wakeLock?.isHeld == true).toString())) } catch (t: Throwable) { DiagnosticLogger.record("receiver_wakelock_acquire_failed", mapOf("error" to t.javaClass.simpleName, "message" to (t.message ?: ""))) } } }
+    private fun releaseWakeLock() { val held = wakeLock?.isHeld == true; try { wakeLock?.release() } catch (_: Throwable) {}; wakeLock = null; DiagnosticLogger.record("receiver_wakelock_released", mapOf("was_held" to held.toString())) }
 
     private fun rebroadcastState() {
         try { LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(Constants.ACTION_RECEIVER_STATE).apply { putExtra(Constants.EXTRA_STATUS, lastStatus); putExtra(Constants.EXTRA_DETAILS, lastDetails) }) } catch (_: Throwable) {}
@@ -108,6 +114,6 @@ class ReceiverVpnService : VpnService() {
         return NotificationCompat.Builder(this, Constants.CHANNEL_ID).setContentTitle(title).setContentText(text).setSmallIcon(android.R.drawable.stat_sys_download).setOngoing(true).build()
     }
 
-    override fun onDestroy() { super.onDestroy(); stopTunnel(); try { stopForeground(STOP_FOREGROUND_REMOVE) } catch (_: Throwable) {} }
-    override fun onRevoke() { stopTunnel(); stopSelf() }
+    override fun onDestroy() { DiagnosticLogger.record("receiver_vpn_service_destroyed"); super.onDestroy(); stopTunnel(); try { stopForeground(STOP_FOREGROUND_REMOVE) } catch (_: Throwable) {} }
+    override fun onRevoke() { DiagnosticLogger.record("receiver_vpn_revoked"); stopTunnel(); stopSelf() }
 }
