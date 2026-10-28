@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * Diagnostic-only, asynchronous event logger.
@@ -81,6 +82,7 @@ object DiagnosticLogger {
     }
 
     fun readLogs(): String {
+        try { writer.submit {}.get(3, TimeUnit.SECONDS) } catch (_: Exception) {}
         val file = logFile ?: return "Diagnostic logger has not initialized."
         val previous = File(file.parentFile, "diagnostic-previous.log")
         return buildString {
