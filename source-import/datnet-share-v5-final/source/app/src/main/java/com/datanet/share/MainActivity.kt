@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.datanet.share.common.Constants
+import com.datanet.share.common.DiagnosticLogger
 import com.datanet.share.common.SpeedTestClient
 import com.datanet.share.common.UdpTest
 import com.datanet.share.receiver.ReceiverService
@@ -41,6 +42,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var ssidText: TextView
     private lateinit var passText: TextView
     private lateinit var interfacesText: TextView
+    private lateinit var exportDiagnosticsBtn: Button
+
+    private val createDiagnosticDocument = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
+        if (uri == null) { appendLog("[${now()}] Diagnostic export cancelled"); return@registerForActivityResult }
+        try {
+            contentResolver.openOutputStream(uri)?.bufferedWriter(Charsets.UTF_8)?.use { it.write(DiagnosticLogger.readLogs()) }
+            appendLog("[${now()}] Diagnostic log exported")
+        } catch (e: Exception) {
+            appendLog("[${now()}] Diagnostic export failed: ${e.javaClass.simpleName}: ${e.message}")
+        }
+    }
 
     private val pendingLogs = StringBuilder()
     private val logLock = Any()
@@ -61,6 +73,7 @@ class MainActivity : AppCompatActivity() {
             val status = intent?.getStringExtra(Constants.EXTRA_STATUS) ?: return
             val details = intent.getStringExtra(Constants.EXTRA_DETAILS) ?: ""
             appendLog("[${now()}] ${status.uppercase()}  $details")
+            DiagnosticLogger.record("ui_service_state", mapOf("status" to status, "details" to details))
             when (status) {
                 "active" -> {
                     val ip = intent.getStringExtra(Constants.EXTRA_PROXY_IP)
@@ -88,6 +101,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        DiagnosticLogger.initialize(applicationContext)
+        DiagnosticLogger.record("activity_created")
         bindViews()
         requestPermissionsIfNeeded()
     }
@@ -106,6 +121,8 @@ class MainActivity : AppCompatActivity() {
         ssidText = findViewById(R.id.ssidText)
         passText = findViewById(R.id.passText)
         interfacesText = findViewById(R.id.interfacesText)
+        exportDiagnosticsBtn = findViewById(R.id.btnExportDiagnostics)
+        exportDiagnosticsBtn.setOnClickListener { createDiagnosticDocument.launch("PhuckStraightTalk-DiagnosticWTF-logs.txt") }
         senderBtn.setOnClickListener { startSender() }
         localOnlyBtn.setOnClickListener { startLocalOnly() }
         receiverBtn.setOnClickListener { startReceiver() }
@@ -194,9 +211,9 @@ class MainActivity : AppCompatActivity() {
         if (needed.isNotEmpty()) permsLauncher.launch(needed.toTypedArray())
     }
 
-    override fun onResume() { super.onResume(); val filter = IntentFilter().apply { addAction(Constants.ACTION_SENDER_STATE); addAction(Constants.ACTION_RECEIVER_STATE) }; LocalBroadcastManager.getInstance(this).registerReceiver(stateReceiver, filter) }
-    override fun onPause() { super.onPause(); try { LocalBroadcastManager.getInstance(this).unregisterReceiver(stateReceiver) } catch (_: Exception) {} }
-    override fun onDestroy() { super.onDestroy(); logHandler.removeCallbacks(logFlushRunnable) }
+    override fun onResume() { super.onResume(); DiagnosticLogger.record("app_foreground"); val filter = IntentFilter().apply { addAction(Constants.ACTION_SENDER_STATE); addAction(Constants.ACTION_RECEIVER_STATE) }; LocalBroadcastManager.getInstance(this).registerReceiver(stateReceiver, filter) }
+    override fun onPause() { DiagnosticLogger.record("app_background"); super.onPause(); try { LocalBroadcastManager.getInstance(this).unregisterReceiver(stateReceiver) } catch (_: Exception) {} }
+    override fun onDestroy() { DiagnosticLogger.record("activity_destroyed"); super.onDestroy(); logHandler.removeCallbacks(logFlushRunnable) }
 
     private fun appendLog(line: String) { synchronized(logLock) { pendingLogs.append(line).append('\n') }; logHandler.removeCallbacks(logFlushRunnable); logHandler.postDelayed(logFlushRunnable, 200) }
 
