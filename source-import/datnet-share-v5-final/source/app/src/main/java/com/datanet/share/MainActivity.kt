@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             val status = intent?.getStringExtra(Constants.EXTRA_STATUS) ?: return
             val details = intent.getStringExtra(Constants.EXTRA_DETAILS) ?: ""
             appendLog("[${now()}] ${status.uppercase()}  $details")
-            DiagnosticLogger.record("ui_service_state", mapOf("status" to status, "details" to details))
+            DiagnosticLogger.record("ui_service_state", mapOf("status" to status, "details_length" to details.length.toString()))
             when (status) {
                 "active" -> {
                     val ip = intent.getStringExtra(Constants.EXTRA_PROXY_IP)
